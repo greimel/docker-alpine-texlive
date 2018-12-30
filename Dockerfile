@@ -6,24 +6,21 @@ WORKDIR /tmp/install-tl-unx
 
 COPY texlive.profile .
 
-# Install TeX Live 2016 with some basic collections
-RUN apk --no-cache add perl=5.24.0-r0 wget=1.18-r2 \
-	xz=5.2.2-r1 tar=1.29-r1 && \
-	wget ftp://tug.org/historic/systems/texlive/2016/install-tl-unx.tar.gz && \
+# Install TeX Live 20xx with some basic collections
+# we need to install perl, wget, xz and tar as dependencies for the building process
+RUN apk --no-cache add perl wget xz tar && \
+	wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz && \
 	tar --strip-components=1 -xvf install-tl-unx.tar.gz && \
-	./install-tl --repository http://repositorios.cpai.unb.br/ctan/systems/texlive/tlnet/ --profile=texlive.profile && \
-	tlmgr install collection-latex collection-latexextra collection-langspanish && \
-	apk del perl wget xz tar && \
-	cd && rm -rf /tmp/install-tl-unx
+	./install-tl --profile=texlive.profile
+RUN apk del perl wget xz tar
+RUN cd && rm -rf /tmp/install-tl-unx
 
-# Install additional packages
-RUN apk --no-cache add perl=5.24.0-r0 wget=1.18-r2 && \
-	tlmgr install bytefield algorithms algorithm2e ec fontawesome && \
-	apk del perl wget && \
-	mkdir /workdir
+RUN mkdir /workdir
 
-ENV PATH="/usr/local/texlive/2016/bin/x86_64-linux:${PATH}"
+ENV PATH="/usr/local/texlive/20xx/bin/x86_64-linux:${PATH}"
 
 WORKDIR /workdir
+
+COPY test.tex .
 
 VOLUME ["/workdir"]
